@@ -1,5 +1,3 @@
-const apiUrl = 'http://localhost:3000';
-
 function showSection(id) {
   document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -7,8 +5,9 @@ function showSection(id) {
 
 // --- Клиенты ---
 async function fetchClients() {
-  const res = await fetch(`${apiUrl}/clients`);
-  const clients = await res.json();
+  const { data: clients, error } = await supabase.from('clients').select('*');
+  if(error) return console.error(error);
+
   const ul = document.getElementById('clientsList');
   ul.innerHTML = '';
   clients.forEach(c => {
@@ -16,26 +15,23 @@ async function fetchClients() {
     li.textContent = `${c.id}: ${c.name}`;
     ul.appendChild(li);
   });
-  // Обновляем селекты для счетов, транзакций и налогов
   updateClientSelects(clients);
 }
 
 async function addClient() {
   const name = document.getElementById('clientName').value;
   if(!name) return;
-  await fetch(`${apiUrl}/clients`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name })
-  });
+  const { error } = await supabase.from('clients').insert([{ name }]);
+  if(error) return console.error(error);
   document.getElementById('clientName').value = '';
   fetchClients();
 }
 
 // --- Счета ---
 async function fetchAccounts() {
-  const res = await fetch(`${apiUrl}/accounts`);
-  const accounts = await res.json();
+  const { data: accounts, error } = await supabase.from('accounts').select('*');
+  if(error) return console.error(error);
+
   const table = document.getElementById('accountsTable');
   table.innerHTML = '<tr><th>ID</th><th>Клиент</th><th>Название</th><th>Баланс</th></tr>';
   accounts.forEach(a => {
@@ -53,11 +49,8 @@ async function addAccount() {
   const name = document.getElementById('accountName').value;
   const balance = parseFloat(document.getElementById('accountBalance').value) || 0;
   if(!client_id || !name) return;
-  await fetch(`${apiUrl}/accounts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ client_id, name, balance })
-  });
+  const { error } = await supabase.from('accounts').insert([{ client_id, name, balance }]);
+  if(error) return console.error(error);
   document.getElementById('accountName').value = '';
   document.getElementById('accountBalance').value = '';
   fetchAccounts();
@@ -65,8 +58,9 @@ async function addAccount() {
 
 // --- Транзакции ---
 async function fetchTransactions() {
-  const res = await fetch(`${apiUrl}/transactions`);
-  const txs = await res.json();
+  const { data: txs, error } = await supabase.from('transactions').select('*');
+  if(error) return console.error(error);
+
   const table = document.getElementById('transactionsTable');
   table.innerHTML = '<tr><th>ID</th><th>Счет</th><th>Тип</th><th>Сумма</th><th>Описание</th></tr>';
   txs.forEach(t => {
@@ -85,11 +79,17 @@ async function addTransaction() {
   const amount = parseFloat(document.getElementById('transactionAmount').value);
   const description = document.getElementById('transactionDesc').value;
   if(!account_id || !type || !amount) return;
-  await fetch(`${apiUrl}/transactions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ account_id, type, amount, description })
-  });
+
+  // Добавляем транзакцию
+  const { error } = await supabase.from('transactions').insert([{ account_id, type, amount, description }]);
+  if(error) return console.error(error);
+
+  // Если доход, добавляем налог
+  if(type === 'income') {
+    const taxAmount = amount * 0.2;
+    await supabase.from('transactions').insert([{ account_id, type: 'expense', amount: taxAmount, description: 'tax' }]);
+  }
+
   document.getElementById('transactionAmount').value = '';
   document.getElementById('transactionDesc').value = '';
   fetchTransactions();
@@ -97,8 +97,9 @@ async function addTransaction() {
 
 // --- Налоги ---
 async function fetchTaxes() {
-  const res = await fetch(`${apiUrl}/taxes`);
-  const taxes = await res.json();
+  const { data: taxes, error } = await supabase.from('taxes').select('*');
+  if(error) return console.error(error);
+
   const table = document.getElementById('taxesTable');
   table.innerHTML = '<tr><th>ID</th><th>Счет</th><th>Ставка</th></tr>';
   taxes.forEach(t => {
@@ -113,11 +114,10 @@ async function addTax() {
   const account_id = document.getElementById('taxAccountSelect').value;
   const rate = parseFloat(document.getElementById('taxRate').value) || 0.2;
   if(!account_id) return;
-  await fetch(`${apiUrl}/taxes`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ account_id, rate })
-  });
+
+  const { error } = await supabase.from('taxes').insert([{ account_id, rate }]);
+  if(error) return console.error(error);
+
   document.getElementById('taxRate').value = '';
   fetchTaxes();
 }
