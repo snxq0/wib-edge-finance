@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WiB.fd Dashboard</title>
+<style>
+/* Основные настройки */
+/* ===== Основные настройки ===== */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background: #f0f3f7;
+  color: #333;
+}
+
+/* Заголовки */
+h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #2c3e50;
+  font-size: 2.5em;
+  letter-spacing: 1px;
+}
+
+/* ===== Навигация ===== */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+nav button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(45deg, #3498db, #2980b9);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+nav button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* ===== Секции ===== */
+section {
+  display: none;
+  max-width: 1000px;
+  margin: 0 auto 50px auto;
+  background: #ffffff;
+  padding: 25px 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+  transition: all 0.5s ease;
+}
+
+section.active {
+  display: block;
+}
+
+/* ===== Формы ===== */
+input, select {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 10px 0;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 10px rgba(52,152,219,0.3);
+}
+
+button {
+  margin-top: 15px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(45deg, #2ecc71, #27ae60);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* ===== Таблицы ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+th, td {
+  padding: 15px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background: linear-gradient(45deg, #3498db, #2980b9);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+tr:hover {
+  background: #f1faff;
+  transform: scale(1.01);
+  transition: all 0.3s ease;
+}
+
+/* ===== Карточки для портфолио-эффекта ===== */
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 15px 0;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #3498db;
+}
+
+.card .balance {
+  font-size: 1.6em;
+  font-weight: bold;
+}
+
+.card .summary span {
+  display: inline-block;
+  margin-right: 15px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.card .income { background: #2ecc71; }
+.card .expense { background: #e74c3c; }
+.card .tax { background: #95a5a6; }
+
+/* ===== Списки ===== */
+ul {
+  padding-left: 25px;
+}
+
+ul li {
+  padding: 6px 0;
+  border-bottom: 1px dashed #ccc;
+}
+
+/* ===== Медиа ===== */
+@media(max-width: 768px){
+  nav { flex-direction: column; }
+  input, select, button { width: 100%; }
+  section { padding: 20px; }
+}
+
+</style>
+
+</style>
+</head>
+<body>
+
+<h1>WiB.fd Dashboard</h1>
+
+<nav>
+  <button onclick="showSection('clients')">Клиенты</button>
+  <button onclick="showSection('accounts')">Счета</button>
+  <button onclick="showSection('transactions')">Доходы/Расходы</button>
+  <button onclick="showSection('taxes')">Налоги</button>
+</nav>
+
+<!-- Клиенты -->
+<section id="clients">
+  <h2>Клиенты</h2>
+  <input type="text" id="clientName" placeholder="Имя клиента">
+  <button onclick="addClient()">Добавить</button>
+  <ul id="clientsList"></ul>
+</section>
+
+<!-- Счета -->
+<section id="accounts">
+  <h2>Счета</h2>
+  <select id="accountClientSelect"></select><br>
+  <input type="text" id="accountName" placeholder="Название счета"><br>
+  <input type="number" id="accountBalance" placeholder="Баланс"><br>
+  <button onclick="addAccount()">Добавить счет</button>
+  <table id="accountsTable">
+    <tr><th>ID</th><th>Клиент</th><th>Название</th><th>Баланс</th></tr>
+  </table>
+</section>
+
+<!-- Доходы/Расходы -->
+<section id="transactions">
+  <h2>Доходы/Расходы</h2>
+  <select id="transactionAccountSelect"></select><br>
+  <select id="transactionType">
+    <option value="income">Доход</option>
+    <option value="expense">Расход</option>
+  </select><br>
+  <input type="number" id="transactionAmount" placeholder="Сумма"><br>
+  <input type="text" id="transactionDesc" placeholder="Описание"><br>
+  <button onclick="addTransaction()">Добавить</button>
+  <table id="transactionsTable">
+    <tr><th>ID</th><th>Счет</th><th>Тип</th><th>Сумма</th><th>Описание</th></tr>
+  </table>
+</section>
+
+<!-- Налоги -->
+<section id="taxes">
+  <h2>Налоги</h2>
+  <select id="taxAccountSelect"></select><br>
+  <input type="number" id="taxRate" placeholder="Ставка (например 0.2)"><br>
+  <button onclick="addTax()">Добавить налог</button>
+  <table id="taxesTable">
+    <tr><th>ID</th><th>Счет</th><th>Ставка</th></tr>
+  </table>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
